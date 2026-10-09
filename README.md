@@ -2,7 +2,7 @@
 
 Collects daily weather forecasts (1-7 days ahead) for several cities, later compares them
 with what actually happened, models when forecasts are most wrong, and shows it all on a
-live dashboard. Everything runs on free tiers.
+live dashboard.
 
 ```
 Open-Meteo API --> GitHub Actions (daily) --> Neon Postgres --> analysis.py (Colab/local) + W&B
@@ -23,6 +23,42 @@ Why Open-Meteo instead of Tomorrow.io/WeatherXu (listed in free-for-dev)? It nee
 and has a free archive of past weather, which we need to score the forecasts.
 
 ---
+
+## Results (as of Oct 8, 2026)
+
+Based on 324 scored forecasts across 3 cities (Islamabad, London, New York) over about 3 weeks.
+
+**1. Forecast error grows with lead time, as expected**
+Same-day forecasts (lead_days = 0) were off by 0.58°C on average. By 7 days out, that grew to roughly
+1.5-2.0°C. Day 7 showed a slight dip below day 6 in this sample, likely noise from the small sample
+size (30 rows) at that lead time rather than a real pattern.
+
+![Error grows with lead time](mae_by_lead.png)
+
+**2. Forecast reliability varies a lot by city, not just by lead time**
+New York was consistently the hardest city to forecast — its error was close to double Islamabad's at
+most lead times (e.g. day 6: 3.22°C vs 1.35°C). Location matters as much as how far ahead you look.
+
+**3. Rain forecasts also get less reliable further out**
+The forecast correctly predicted rain/no-rain 90% of the time same-day, dropping to 67-75% by day 6-7.
+
+**4. A simple model beat the naive baseline**
+I trained 3 models (Ridge, Random Forest, Gradient Boosting) to predict how wrong a forecast's max
+temperature would be, using lead time and the forecast's own values as features, with a time-based
+train/test split (no shuffling, since this is time series data).
+
+| Model | Test MAE (°C) |
+|---|---|
+| **Ridge regression** | **0.495** |
+| Random Forest | 0.670 |
+| Gradient Boosting | 0.676 |
+| Baseline (avg error per lead time) | 0.692 |
+
+Ridge regression beat the baseline by about 28%. The tree-based models (Random Forest, Gradient
+Boosting) didn't beat the baseline here, most likely because 261 training rows isn't enough for them
+to outperform a simpler linear model — tree ensembles typically need more data to show their advantage.
+
+**Live dashboard:** https://forecast-tracker.streamlit.app
 
 ## Step 0: What you need
 - Python 3.10+ and Git installed (`python --version`, `git --version`)
