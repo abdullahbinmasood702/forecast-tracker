@@ -11,7 +11,8 @@ st.set_page_config(page_title="Forecast Accuracy Tracker", layout="wide")
 
 @st.cache_resource
 def get_engine():
-    return create_engine(os.environ["DATABASE_URL"], pool_pre_ping=True)
+    url = os.environ["DATABASE_URL"].replace("postgresql://", "postgresql+psycopg://", 1)
+    return create_engine(url, pool_pre_ping=True)
 
 
 @st.cache_data(ttl=600)
@@ -78,3 +79,4 @@ if not upcoming.empty:
     upcoming["typical_error_c"] = upcoming["typical_error_c"].round(2)
     st.dataframe(upcoming, use_container_width=True, hide_index=True)
     st.caption("typical_error_c = historical average error for that city and lead time.")
+
