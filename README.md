@@ -1,5 +1,7 @@
 # Forecast Accuracy Tracker
 
+![Dashboard](dashboard.png)
+
 Collects daily weather forecasts (1-7 days ahead) for several cities, later compares them
 with what actually happened, models when forecasts are most wrong, and shows it all on a
 live dashboard.
