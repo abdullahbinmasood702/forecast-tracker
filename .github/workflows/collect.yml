@@ -2,8 +2,8 @@ name: Collect weather data
 
 on:
   schedule:
-    - cron: "0 3 * * *"
-  workflow_dispatch:
+    - cron: "0 3 * * *"   # every day at 03:00 UTC
+  workflow_dispatch:       # lets you run it manually from the Actions tab
 
 jobs:
   collect:
@@ -16,7 +16,7 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements-collect.txt
 
       - name: Collect forecasts
         run: python collect.py
